@@ -21,6 +21,8 @@ namespace JasonPereira84.Helpers
 
         public static Boolean IsNullOrEmptyOrWhiteSpace(this String value)
             => String.IsNullOrWhiteSpace(value);
+        public static Boolean IsNotNullOrEmptyOrWhiteSpace(this String value)
+            => !IsNullOrEmptyOrWhiteSpace(value);
 
         public static (Boolean IsSane, String Value) EvaluateSanity(this String value,
             String valueIfNull, String valueIfEmpty, String valueIfWhitespace, Boolean dontTrim = false)
