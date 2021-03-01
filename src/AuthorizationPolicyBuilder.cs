@@ -17,36 +17,49 @@ namespace JasonPereira84.Helpers
                 => authorizationPolicyBuilder.RequireAssertion(context => predicate.Invoke(context.User.Claims));
 
             #region RequireClaimTypes
-            private static AuthorizationPolicyBuilder requireClaimTypes(AuthorizationPolicyBuilder authorizationPolicyBuilder, Func<IEnumerable<Claim>, String, Boolean> predicate, IEnumerable<String> requiredClaimTypes)
-                => RequireThatClaims(
-                    authorizationPolicyBuilder,
-                    predicate: claims =>
-                    {
-                        if (requiredClaimTypes == null) throw new ArgumentNullException(nameof(requiredClaimTypes));
-                        if (!requiredClaimTypes.Any()) throw new ArgumentException($"The {nameof(requiredClaimTypes)} cannot be NONE");
-
-                        return requiredClaimTypes.All(claimType => predicate.Invoke(claims, claimType));
-                    });
-            public static AuthorizationPolicyBuilder RequireClaimTypes(this AuthorizationPolicyBuilder authorizationPolicyBuilder, Func<IEnumerable<Claim>, String, Boolean> predicate, IEnumerable<String> requiredClaimTypes)
-                => requireClaimTypes(authorizationPolicyBuilder, predicate, requiredClaimTypes);
-            public static AuthorizationPolicyBuilder RequireClaimTypes(this AuthorizationPolicyBuilder authorizationPolicyBuilder, Func<IEnumerable<Claim>, String, Boolean> predicate, params String[] requiredClaimTypes)
-                => requireClaimTypes(authorizationPolicyBuilder, predicate, requiredClaimTypes);
-
             private static AuthorizationPolicyBuilder requireClaimTypes(AuthorizationPolicyBuilder authorizationPolicyBuilder, IEnumerable<String> requiredClaimTypes)
-                => requireClaimTypes(authorizationPolicyBuilder, (claims, requiredClaimType) => HasClaimOfType(claims, requiredClaimType, out Claim claim), requiredClaimTypes);
+            {
+                if (requiredClaimTypes == null)
+                    throw new ArgumentNullException(nameof(requiredClaimTypes));
+
+                if (!requiredClaimTypes.Any())
+                    throw new ArgumentException($"The {nameof(requiredClaimTypes)} cannot be NONE");
+
+                return authorizationPolicyBuilder
+                    .RequireAssertion(context =>
+                        requiredClaimTypes
+                            .All(requiredClaimType =>
+                                HasClaimOfType(context.User.Claims, requiredClaimType, out Claim claim) && claim.Value.IsNotNullOrEmptyOrWhiteSpace()));
+            }
             public static AuthorizationPolicyBuilder RequireClaimTypes(this AuthorizationPolicyBuilder authorizationPolicyBuilder, IEnumerable<String> requiredClaimTypes)
-                => requireClaimTypes(authorizationPolicyBuilder, (claims, requiredClaimType) => HasClaimOfType(claims, requiredClaimType, out Claim claim), requiredClaimTypes);
+                => requireClaimTypes(authorizationPolicyBuilder, requiredClaimTypes);
             public static AuthorizationPolicyBuilder RequireClaimTypes(this AuthorizationPolicyBuilder authorizationPolicyBuilder, params String[] requiredClaimTypes)
                 => requireClaimTypes(authorizationPolicyBuilder, requiredClaimTypes);
             #endregion RequireClaimTypes
 
             #region RequireAuthenticatedClaimTypes
-            private static AuthorizationPolicyBuilder requireAuthenticatedClaimTypes(AuthorizationPolicyBuilder authorizationPolicyBuilder, String issuer, IEnumerable<String> requiredClaimTypes, Boolean ignoreCase)
-                => requireClaimTypes(authorizationPolicyBuilder, (claims, requiredClaimType) => HasClaimOfType(GetAuthenticatedClaims(claims, issuer, ignoreCase), requiredClaimType, out Claim claim), requiredClaimTypes);
-            public static AuthorizationPolicyBuilder RequireAuthenticatedClaimTypes(this AuthorizationPolicyBuilder authorizationPolicyBuilder, String issuer, IEnumerable<String> requiredClaimTypes, Boolean ignoreCase = true)
-                => requireAuthenticatedClaimTypes(authorizationPolicyBuilder, issuer, requiredClaimTypes, ignoreCase);
-            public static AuthorizationPolicyBuilder RequireAuthenticatedClaimTypes(this AuthorizationPolicyBuilder authorizationPolicyBuilder, String issuer, Boolean ignoreCase = true, params String[] requiredClaimTypes)
-                => requireAuthenticatedClaimTypes(authorizationPolicyBuilder, issuer, requiredClaimTypes, ignoreCase);
+            private static AuthorizationPolicyBuilder requireAuthenticatedClaimTypes(AuthorizationPolicyBuilder authorizationPolicyBuilder, String issuer, IEnumerable<String> requiredClaimTypes)
+            {
+                if (requiredClaimTypes == null)
+                    throw new ArgumentNullException(nameof(requiredClaimTypes));
+
+                if (!requiredClaimTypes.Any())
+                    throw new ArgumentException($"The {nameof(requiredClaimTypes)} cannot be NONE");
+
+                return authorizationPolicyBuilder
+                    .RequireAssertion(context =>
+                    {
+                        var authenticatedClaims = GetAuthenticatedClaims(context.User.Claims, issuer);
+
+                        return requiredClaimTypes
+                            .All(requiredClaimType =>
+                                HasClaimOfType(authenticatedClaims, requiredClaimType, out Claim claim) && claim.Value.IsNotNullOrEmptyOrWhiteSpace());
+                    });
+            }
+            public static AuthorizationPolicyBuilder RequireAuthenticatedClaimTypes(this AuthorizationPolicyBuilder authorizationPolicyBuilder, String issuer, IEnumerable<String> requiredClaimTypes)
+                => requireAuthenticatedClaimTypes(authorizationPolicyBuilder, issuer, requiredClaimTypes);
+            public static AuthorizationPolicyBuilder RequireAuthenticatedClaimTypes(this AuthorizationPolicyBuilder authorizationPolicyBuilder, String issuer, params String[] requiredClaimTypes)
+                => requireAuthenticatedClaimTypes(authorizationPolicyBuilder, issuer, requiredClaimTypes);
             #endregion RequireAuthenticatedClaimTypes
         }
     }
