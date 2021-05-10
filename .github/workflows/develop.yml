@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Chaeckout develop
+    - name: Checkout develop
       uses: actions/checkout@v2
     
     - name: Setup .NET Core
