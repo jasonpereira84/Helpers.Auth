@@ -20,7 +20,7 @@
     <PackageDescription>Auth(entication + orization)-centric helper methods, properties, objects etc.</PackageDescription>
     <PackageTags>C#, Library, Utils, Helpers, Auth</PackageTags>
     <Authors>jasonpereira84@gmail.com</Authors>
-    <Version>2.0.1</Version>
+    <Version>2.0.2</Version>
     
   </PropertyGroup>
 
