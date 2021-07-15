@@ -19,6 +19,9 @@
     <Title>JasonPereira84's auth. helpers library</Title>
     <PackageDescription>Auth(entication + orization)-centric helper methods, properties, objects etc.</PackageDescription>
     <PackageTags>C#, Library, Utils, Helpers, Auth</PackageTags>
+    <RepositoryUrl>https://github.com/jasonpereira84/Helpers.Auth</RepositoryUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Authors>jasonpereira84@gmail.com</Authors>
     <Version>2.0.1</Version>
     
@@ -37,6 +40,13 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="3.1.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
