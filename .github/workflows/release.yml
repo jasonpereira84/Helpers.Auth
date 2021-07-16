@@ -21,7 +21,7 @@ jobs:
       run: dotnet restore
       
     - name: Build solution
-      run: dotnet build --configuration Release --no-restore --verbosity Normal --output BuildResults
+      run: dotnet build --configuration Release --no-restore --verbosity Normal --output BuildResults --disable-parallel
 
     - name: Run tests
       run: dotnet test --configuration Release --no-restore --verbosity Normal
