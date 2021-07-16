@@ -21,4 +21,13 @@ jobs:
       run: dotnet restore
       
     - name: Build solution
-      run: dotnet build --configuration Debug --no-restore --verbosity Normal
+      run: dotnet build --configuration Debug --no-restore --verbosity Normal --output BuildResults
+
+    - name: Run tests
+      run: dotnet test --configuration Debug --no-restore --verbosity Normal
+
+    - name: Upload artifact 
+      uses: actions/upload-artifact@v2
+      with:
+        path: BuildResults
+        if-no-files-found: error

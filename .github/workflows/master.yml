@@ -21,7 +21,16 @@ jobs:
       run: dotnet restore
       
     - name: Build solution
-      run: dotnet build --configuration Release --no-restore --verbosity Normal
+      run: dotnet build --configuration Release --no-restore --verbosity Normal --output BuildResults
+
+    - name: Run tests
+      run: dotnet test --configuration Release --no-restore --verbosity Normal
+
+    - name: Upload artifact 
+      uses: actions/upload-artifact@v2
+      with:
+        path: BuildResults
+        if-no-files-found: error
       
     - name: Publish package
-      run: dotnet nuget push src/bin/Release/*.nupkg -k ${{secrets.NUGET_APIKEY}} -s https://api.nuget.org/v3/index.json
+      run: dotnet nuget push BuildResults/*.nupkg -k ${{secrets.NUGET_APIKEY}} -s https://api.nuget.org/v3/index.json

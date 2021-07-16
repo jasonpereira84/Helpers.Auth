@@ -3,11 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30225.117
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helpers.Auth", "src\Helpers.Auth.csproj", "{68656C70-6175-7468-0000-000000737263}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Helpers.Auth", "Helpers.Auth\Helpers.Auth.csproj", "{68656C70-6175-7468-0000-000000737263}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{537ACCD1-022B-4AFF-BE23-E5E7ACFAA1F4}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{8DAB1EC8-0258-456F-A7DC-728308072833}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{5044BA86-8FAA-44C8-97FA-3CEC0878C3C1}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\develop.yml = .github\workflows\develop.yml
+		.github\workflows\master.yml = .github\workflows\master.yml
+		.github\workflows\release.yml = .github\workflows\release.yml
 	EndProjectSection
 EndProject
 Global
@@ -23,6 +32,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8DAB1EC8-0258-456F-A7DC-728308072833} = {537ACCD1-022B-4AFF-BE23-E5E7ACFAA1F4}
+		{5044BA86-8FAA-44C8-97FA-3CEC0878C3C1} = {8DAB1EC8-0258-456F-A7DC-728308072833}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6A61736F-6E70-6572-6569-726138340007}
