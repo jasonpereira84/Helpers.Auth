@@ -2,11 +2,14 @@
 
 namespace JasonPereira84.Helpers
 {
-    namespace Constants
+    namespace Auth
     {
-        public static class ClaimValues
+        namespace Constants
         {
-            public const String ApiCredential = "ApiCredential";
+            public static class ClaimValues
+            {
+                public const String ApiCredential = "ApiCredential";
+            }
         }
     }
 }
