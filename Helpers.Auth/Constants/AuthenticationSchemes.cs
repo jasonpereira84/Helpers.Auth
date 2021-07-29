@@ -2,13 +2,16 @@
 
 namespace JasonPereira84.Helpers
 {
-    namespace Constants
+    namespace Auth
     {
-        public static class AuthenticationSchemes
+        namespace Constants
         {
-            public const String ApplicationCookie = "AppCookie";
-            public const String Okta_WsFederation = "OktaWsFed";
-            public const String ApplicationAccount = "AppAccount";
+            public static class AuthenticationSchemes
+            {
+                public const String ApplicationCookie = "AppCookie";
+                public const String Okta_WsFederation = "OktaWsFed";
+                public const String ApplicationAccount = "AppAccount";
+            }
         }
     }
 }

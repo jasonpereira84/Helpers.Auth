@@ -2,13 +2,16 @@
 
 namespace JasonPereira84.Helpers
 {
-    namespace Constants
+    namespace Auth
     {
-        public static class PolicyNames
+        namespace Constants
         {
-            public const String ValidAppUser = "ValidAppUser";
+            public static class PolicyNames
+            {
+                public const String ValidAppUser = "ValidAppUser";
 
-            public const String ValidRelyingParty = "ValidRelyingParty";
+                public const String ValidRelyingParty = "ValidRelyingParty";
+            }
         }
     }
 }
