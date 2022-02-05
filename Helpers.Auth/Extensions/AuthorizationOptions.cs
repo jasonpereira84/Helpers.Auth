@@ -1,4 +1,6 @@
-﻿namespace JasonPereira84.Helpers
+﻿using System;
+
+namespace JasonPereira84.Helpers
 {
     namespace Extensions
     {
@@ -8,7 +10,6 @@
         {
             public static void AddPolicy(this AuthorizationOptions authorizationOptions, Policy policy)
                 => authorizationOptions.AddPolicy(policy.Name, policy.ConfigurePolicy);
-
         }
     }
 }
