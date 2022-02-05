@@ -11,7 +11,7 @@ namespace JasonPereira84.Helpers
             public static AuthenticationProperties ExpireIn(this AuthenticationProperties authenticationProperties, TimeSpan timeSpan)
             {
                 if (!authenticationProperties.IssuedUtc.HasValue)
-                    authenticationProperties.IssuedUtc = DateTimeOffset.UtcNow;
+                    throw new ArgumentNullException($"{nameof(authenticationProperties)}.{nameof(authenticationProperties.IssuedUtc)}");
 
                 authenticationProperties.ExpiresUtc = authenticationProperties.IssuedUtc.Value.Add(timeSpan);
                 return authenticationProperties;

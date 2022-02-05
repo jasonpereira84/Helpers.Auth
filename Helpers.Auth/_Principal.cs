@@ -9,11 +9,14 @@ namespace JasonPereira84.Helpers
 {
     public abstract class _Principal
     {
-        protected ImmutableDictionary<String, IEnumerable<String>> claimMap;
+        protected internal ImmutableDictionary<String, IEnumerable<String>> _claimMap;
 
         protected _Principal(IEnumerable<Claim> claims)
         {
-            claimMap = ImmutableDictionary.CreateRange(
+            if (claims == null)
+                throw new ArgumentNullException(nameof(claims));
+
+            _claimMap = ImmutableDictionary.CreateRange(
                 claims
                     .Where(c =>
                         c != null &&
@@ -27,59 +30,58 @@ namespace JasonPereira84.Helpers
                     .GroupBy(a => a.Type)
                     .ToDictionary(
                         g => g.Key,
-                        g => g.Select(a => a.Value)));
+                        g => g.Select(a => a.Value).Distinct()));
         }
 
         public IEnumerable<String> GetClaimValues(String claimType)
-            => claimMap.ContainsKey(claimType) 
-                ? claimMap[claimType]
-                : Enumerable.Empty<string>();
+            => _claimMap.ContainsKey(claimType) 
+                ? _claimMap[claimType]
+                : Enumerable.Empty<String>();
 
         public Nullable<Int64> GetClaimValueInt64(String claimType)
-            => claimMap.ContainsKey(claimType)
-                ? Int64.TryParse(claimMap[claimType].First(), out Int64 value)
+            => _claimMap.ContainsKey(claimType)
+                ? Int64.TryParse(_claimMap[claimType].First(), out Int64 value)
                     ? value
                     : default(Nullable<Int64>)
                 : default(Nullable<Int64>);
 
         public Nullable<Int32> GetClaimValueInt32(String claimType)
-            => claimMap.ContainsKey(claimType)
-                ? Int32.TryParse(claimMap[claimType].First(), out Int32 value)
+            => _claimMap.ContainsKey(claimType)
+                ? Int32.TryParse(_claimMap[claimType].First(), out Int32 value)
                     ? value
                     : default(Nullable<Int32>)
                 : default(Nullable<Int32>);
 
-        public Nullable<DateTime> GetClaimValueDateTime(String claimType)
-            => claimMap.ContainsKey(claimType)
-                ? DateTime.TryParse(claimMap[claimType].First(), out DateTime value)
+        public Nullable<Int16> GetClaimValueInt16(String claimType)
+            => _claimMap.ContainsKey(claimType)
+                ? Int16.TryParse(_claimMap[claimType].First(), out Int16 value)
                     ? value
-                    : default(Nullable<DateTime>)
-                : default(Nullable<DateTime>);
+                    : default(Nullable<Int16>)
+                : default(Nullable<Int16>);
 
         public Nullable<DateTime> GetClaimValueDateTime(String claimType, IFormatProvider formatProvider, DateTimeStyles styles)
-            => claimMap.ContainsKey(claimType)
-                ? DateTime.TryParse(claimMap[claimType].First(), formatProvider, styles, out DateTime value)
+            => _claimMap.ContainsKey(claimType)
+                ? DateTime.TryParse(_claimMap[claimType].First(), formatProvider, styles, out DateTime value)
                     ? value
                     : default(Nullable<DateTime>)
                 : default(Nullable<DateTime>);
 
-        public Nullable<DateTimeOffset> GetClaimValueDateTimeOffset(String claimType)
-            => claimMap.ContainsKey(claimType)
-                ? DateTimeOffset.TryParse(claimMap[claimType].First(), out DateTimeOffset value)
-                    ? value
-                    : default(Nullable<DateTimeOffset>)
-                : default(Nullable<DateTimeOffset>);
+        public Nullable<DateTime> GetClaimValueDateTime(String claimType)
+            => GetClaimValueDateTime(claimType, DateTimeFormatInfo.CurrentInfo, DateTimeStyles.None);
 
         public Nullable<DateTimeOffset> GetClaimValueDateTimeOffset(String claimType, IFormatProvider formatProvider, DateTimeStyles styles)
-            => claimMap.ContainsKey(claimType)
-                ? DateTimeOffset.TryParse(claimMap[claimType].First(), formatProvider, styles, out DateTimeOffset value)
+            => _claimMap.ContainsKey(claimType)
+                ? DateTimeOffset.TryParse(_claimMap[claimType].First(), formatProvider, styles, out DateTimeOffset value)
                     ? value
                     : default(Nullable<DateTimeOffset>)
                 : default(Nullable<DateTimeOffset>);
 
+        public Nullable<DateTimeOffset> GetClaimValueDateTimeOffset(String claimType)
+            => GetClaimValueDateTimeOffset(claimType, DateTimeFormatInfo.CurrentInfo, DateTimeStyles.None);
+
         public Nullable<DateTimeOffset> GetClaimValueUnixTimeSeconds(String claimType)
-            => claimMap.ContainsKey(claimType)
-                ? Int64.TryParse(claimMap[claimType].First(), out Int64 value)
+            => _claimMap.ContainsKey(claimType)
+                ? Int64.TryParse(_claimMap[claimType].First(), out Int64 value)
                     ? DateTimeOffset.FromUnixTimeSeconds(value)
                     : default(Nullable<DateTimeOffset>)
                 : default(Nullable<DateTimeOffset>);
@@ -96,8 +98,8 @@ namespace JasonPereira84.Helpers
             if (!claimValues.Any())
                 return false;
 
-            foreach (var claimValue in claimValues)
-                if (!expectedValues.Contains(claimValue))
+            foreach (var expectedValue in expectedValues)
+                if (!claimValues.Contains(expectedValue))
                     return false;
             return true;
         }
@@ -115,7 +117,7 @@ namespace JasonPereira84.Helpers
             => !HasClaim(claimType, expectedValue);
 
         public Boolean HasClaimType(String claimType)
-            => claimMap.ContainsKey(claimType);
+            => _claimMap.ContainsKey(claimType);
         public Boolean NotHasClaimType(String claimType)
             => !HasClaimType(claimType);
 
@@ -131,8 +133,8 @@ namespace JasonPereira84.Helpers
             if (!claimValues.Any())
                 return false;
 
-            foreach (var claimValue in claimValues)
-                if (expectedValues.Contains(claimValue))
+            foreach (var expectedValue in expectedValues)
+                if (claimValues.Contains(expectedValue))
                     return true;
             return false;
         }

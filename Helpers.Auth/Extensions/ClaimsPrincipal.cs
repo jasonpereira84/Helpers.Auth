@@ -9,17 +9,20 @@ namespace JasonPereira84.Helpers
     {
         public static partial class Auth
         {
-            public static ClaimsPrincipal AsClaimsPrincipal(this IIdentity primaryIdentity)
-                => new ClaimsPrincipal(primaryIdentity);
+            public static ClaimsPrincipal AsClaimsPrincipal(this IIdentity identity)
+                => new ClaimsPrincipal(identity);
 
-            public static ClaimsPrincipal AppendIdentities(this ClaimsPrincipal claimsPrincipal, IEnumerable<ClaimsIdentity> additionalIdentities)
+            public static ClaimsPrincipal AsClaimsPrincipal(this IEnumerable<ClaimsIdentity> identities)
+                => new ClaimsPrincipal(identities);
+
+            public static ClaimsPrincipal AppendIdentities(this ClaimsPrincipal claimsPrincipal, IEnumerable<ClaimsIdentity> identities)
             {
-                claimsPrincipal.AddIdentities(identities: additionalIdentities);
+                claimsPrincipal.AddIdentities(identities);
                 return claimsPrincipal;
             }
 
-            public static ClaimsPrincipal AppendIdentities(this ClaimsPrincipal claimsPrincipal, params ClaimsIdentity[] additionalIdentities)
-                => AppendIdentities(claimsPrincipal, additionalIdentities ?? Enumerable.Empty<ClaimsIdentity>());
+            public static ClaimsPrincipal AppendIdentities(this ClaimsPrincipal claimsPrincipal, params ClaimsIdentity[] identities)
+                => AppendIdentities(claimsPrincipal, identities ?? Enumerable.Empty<ClaimsIdentity>());
         }
     }
 }

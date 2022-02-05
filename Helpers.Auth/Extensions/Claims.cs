@@ -28,6 +28,29 @@ namespace JasonPereira84.Helpers
             public static Boolean NotHasClaimsOfType(this IEnumerable<Claim> claims, String claimType)
                 => !HasClaimsOfType(claims, claimType);
 
+            public static Boolean HasAllClaimsOfType(this IEnumerable<Claim> claims, IEnumerable<String> requiredClaimTypes) 
+            {
+                if (requiredClaimTypes == null)
+                    throw new ArgumentNullException(nameof(requiredClaimTypes));
+
+                if (!requiredClaimTypes.Any())
+                    throw new ArgumentException($"The '{nameof(requiredClaimTypes)}' cannot be empty.", nameof(requiredClaimTypes));
+
+                var claimTypes = claims
+                    .Where(c =>
+                        c != null &&
+                        !String.IsNullOrWhiteSpace(c.Type) &&
+                        !String.IsNullOrWhiteSpace(c.Value))
+                    .Select(c => c.Type.Trim())
+                    .Distinct();
+
+                return requiredClaimTypes
+                    .All(requiredClaimType => claimTypes.Contains(requiredClaimType));
+            }
+
+            public static Boolean HasAllClaimsOfType(this IEnumerable<Claim> claims, params String[] requiredClaimTypes)
+                => HasAllClaimsOfType(claims, requiredClaimTypes ?? Enumerable.Empty<String>());
+
             public static Nullable<Int64> GetClaimValueInt64(this IEnumerable<Claim> claims, String claimType)
                 => HasClaimsOfType(claims, claimType, out IEnumerable<Claim> claimsOfType)
                     ? Int64.TryParse(claimsOfType.First().Value.Trim(), out Int64 value)
@@ -42,12 +65,12 @@ namespace JasonPereira84.Helpers
                         : default(Nullable<Int32>)
                     : default(Nullable<Int32>);
 
-            public static Nullable<DateTime> GetClaimValueDateTime(this IEnumerable<Claim> claims, String claimType)
+            public static Nullable<Int16> GetClaimValueInt16(this IEnumerable<Claim> claims, String claimType)
                 => HasClaimsOfType(claims, claimType, out IEnumerable<Claim> claimsOfType)
-                    ? DateTime.TryParse(claimsOfType.First().Value.Trim(), out DateTime value)
+                    ? Int16.TryParse(claimsOfType.First().Value.Trim(), out Int16 value)
                         ? value
-                        : default(Nullable<DateTime>)
-                    : default(Nullable<DateTime>);
+                        : default(Nullable<Int16>)
+                    : default(Nullable<Int16>);
 
             public static Nullable<DateTime> GetClaimValueDateTime(this IEnumerable<Claim> claims, String claimType, IFormatProvider formatProvider, DateTimeStyles styles)
                 => HasClaimsOfType(claims, claimType, out IEnumerable<Claim> claimsOfType)
@@ -56,12 +79,8 @@ namespace JasonPereira84.Helpers
                         : default(Nullable<DateTime>)
                     : default(Nullable<DateTime>);
 
-            public static Nullable<DateTimeOffset> GetClaimValueDateTimeOffset(this IEnumerable<Claim> claims, String claimType)
-                => HasClaimsOfType(claims, claimType, out IEnumerable<Claim> claimsOfType)
-                    ? DateTimeOffset.TryParse(claimsOfType.First().Value.Trim(), out DateTimeOffset value)
-                        ? value
-                        : default(Nullable<DateTimeOffset>)
-                    : default(Nullable<DateTimeOffset>);
+            public static Nullable<DateTime> GetClaimValueDateTime(this IEnumerable<Claim> claims, String claimType)
+                => GetClaimValueDateTime(claims, claimType, DateTimeFormatInfo.CurrentInfo, DateTimeStyles.None);
 
             public static Nullable<DateTimeOffset> GetClaimValueDateTimeOffset(this IEnumerable<Claim> claims, String claimType, IFormatProvider formatProvider, DateTimeStyles styles)
                 => HasClaimsOfType(claims, claimType, out IEnumerable<Claim> claimsOfType)
@@ -69,6 +88,9 @@ namespace JasonPereira84.Helpers
                         ? value
                         : default(Nullable<DateTimeOffset>)
                     : default(Nullable<DateTimeOffset>);
+
+            public static Nullable<DateTimeOffset> GetClaimValueDateTimeOffset(this IEnumerable<Claim> claims, String claimType)
+                => GetClaimValueDateTimeOffset(claims, claimType, DateTimeFormatInfo.CurrentInfo, DateTimeStyles.None);
 
             public static Nullable<DateTimeOffset> GetClaimValueUnixTimeSeconds(this IEnumerable<Claim> claims, String claimType)
                 => HasClaimsOfType(claims, claimType, out IEnumerable<Claim> claimsOfType)
@@ -88,8 +110,9 @@ namespace JasonPereira84.Helpers
                 if (NotHasClaimsOfType(claims, claimType, out IEnumerable<Claim> claimsOfType))
                     return false;
 
-                foreach (var claimValue in claimsOfType.Select(c => c.Value.Trim()))
-                    if (!expectedValues.Contains(claimValue))
+                var claimValues = claimsOfType.Select(c => c.Value.Trim());
+                foreach (var expectedValue in expectedValues)
+                    if (!claimValues.Contains(expectedValue))
                         return false;
                 return true;
             }
@@ -117,8 +140,9 @@ namespace JasonPereira84.Helpers
                 if (NotHasClaimsOfType(claims, claimType, out IEnumerable<Claim> claimsOfType))
                     return false;
 
-                foreach (var claimValue in claimsOfType.Select(c => c.Value.Trim()))
-                    if (expectedValues.Contains(claimValue))
+                var claimValues = claimsOfType.Select(c => c.Value.Trim());
+                foreach (var expectedValue in expectedValues)
+                    if (claimValues.Contains(expectedValue))
                         return true;
                 return false;
             }
