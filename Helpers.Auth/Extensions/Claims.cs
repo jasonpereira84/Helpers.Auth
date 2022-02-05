@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Linq;
-using System.Security;
 using System.Security.Claims;
-using System.Security.Principal;
 using System.Collections.Generic;
-
+using System.Globalization;
 
 namespace JasonPereira84.Helpers
 {
@@ -12,112 +10,149 @@ namespace JasonPereira84.Helpers
     {
         public static partial class Auth
         {
-            public static Boolean IsAuthenticated(this Claim claim) => claim.Subject.IsAuthenticated;
-            public static Boolean IsNotAuthenticated(this Claim claim) => !IsAuthenticated(claim);
+            public static IEnumerable<Claim> GetClaimsOfType(this IEnumerable<Claim> claims, String claimType)
+                => claims
+                    .Where(c =>
+                        c != null &&
+                        !String.IsNullOrWhiteSpace(c.Type) &&
+                        !String.IsNullOrWhiteSpace(c.Value) &&
+                        c.Type.Equals(claimType));
 
+            public static Boolean HasClaimsOfType(this IEnumerable<Claim> claims, String claimType, out IEnumerable<Claim> claimsOfType)
+                => (claimsOfType = GetClaimsOfType(claims, claimType)).Any();
+            public static Boolean NotHasClaimsOfType(this IEnumerable<Claim> claims, String claimType, out IEnumerable<Claim> claimsOfType)
+                => !HasClaimsOfType(claims, claimType, out claimsOfType);
 
-            public static Boolean IsAuthenticated(this Claim claim, String issuer, Boolean ignoreCase = false)
-                => String.Compare(issuer, claim.Issuer, ignoreCase).Equals(0) && IsAuthenticated(claim);
-            public static Boolean IsNotAuthenticated(this Claim claim, String issuer, Boolean ignoreCase = false)
-                => !IsAuthenticated(claim, issuer, ignoreCase);
+            public static Boolean HasClaimsOfType(this IEnumerable<Claim> claims, String claimType)
+                => claims.HasClaimsOfType(claimType, out _);
+            public static Boolean NotHasClaimsOfType(this IEnumerable<Claim> claims, String claimType)
+                => !HasClaimsOfType(claims, claimType);
 
-
-            public static IEnumerable<Claim> GetAuthenticatedClaims(this IEnumerable<Claim> claims)
-                => claims.Where(claim => IsAuthenticated(claim));
-            public static Boolean HasAuthenticatedClaims(this IEnumerable<Claim> claims, out IEnumerable<Claim> authenticatedClaims)
-                => (authenticatedClaims = GetAuthenticatedClaims(claims)).Any();
-            public static Boolean HasAuthenticatedClaims(this IEnumerable<Claim> claims)
-                => claims.Any(claim => IsAuthenticated(claim));
-
-
-            public static IEnumerable<Claim> GetAuthenticatedClaims(this IEnumerable<Claim> claims, String issuer, Boolean ignoreCase = false)
-                => claims.Where(claim => IsAuthenticated(claim, issuer, ignoreCase));
-            public static Boolean HasAuthenticatedClaims(this IEnumerable<Claim> claims, String issuer, out IEnumerable<Claim> authenticatedClaims, Boolean ignoreCase = false)
-                => (authenticatedClaims = GetAuthenticatedClaims(claims, issuer, ignoreCase)).Any();
-            public static Boolean HasAuthenticatedClaims(this IEnumerable<Claim> claims, String issuer, Boolean ignoreCase = false)
-                => claims.Any(claim => IsAuthenticated(claim, issuer, ignoreCase));
-
-
-            public static IEnumerable<Claim> GetClaimsOfType(this IEnumerable<Claim> claims, String claimType, Boolean ignoreCase = false)
-                => claims.Where(claim => String.Compare(claimType, claim.Type, ignoreCase).Equals(0));
-            public static Boolean HasClaimsOfType(this IEnumerable<Claim> claims, String claimType, out IEnumerable<Claim> claimsOfType, Boolean ignoreCase = false)
-                => (claimsOfType = GetClaimsOfType(claims, claimType, ignoreCase)).Any();
-            public static Boolean HasClaimsOfType(this IEnumerable<Claim> claims, String claimType, Boolean ignoreCase = false)
-                => claims.Any(claim => String.Compare(claimType, claim.Type, ignoreCase).Equals(0));
-
-
-            public static Claim GetClaimOfTypeOrDefault(this IEnumerable<Claim> claims, String claimType, Boolean ignoreCase = false, Claim defaultValue = default)
-                => claims.FirstOrDefault(claim => String.Compare(claimType, claim.Type, ignoreCase).Equals(0)) ?? defaultValue;
-            public static Boolean HasClaimOfTypeOrDefault(this IEnumerable<Claim> claims, String claimType, out Claim claimOfType, Boolean ignoreCase = false, Claim defaultValue = default)
+            public static Boolean HasAllClaimsOfType(this IEnumerable<Claim> claims, IEnumerable<String> requiredClaimTypes) 
             {
-                claimOfType = GetClaimOfTypeOrDefault(claims, claimType, ignoreCase, null);
-                if (claimOfType != null)
-                    return true;
+                if (requiredClaimTypes == null)
+                    throw new ArgumentNullException(nameof(requiredClaimTypes));
 
-                claimOfType = defaultValue;
-                return false;
+                if (!requiredClaimTypes.Any())
+                    throw new ArgumentException($"The '{nameof(requiredClaimTypes)}' cannot be empty.", nameof(requiredClaimTypes));
+
+                var claimTypes = claims
+                    .Where(c =>
+                        c != null &&
+                        !String.IsNullOrWhiteSpace(c.Type) &&
+                        !String.IsNullOrWhiteSpace(c.Value))
+                    .Select(c => c.Type.Trim())
+                    .Distinct();
+
+                return requiredClaimTypes
+                    .All(requiredClaimType => claimTypes.Contains(requiredClaimType));
             }
 
+            public static Boolean HasAllClaimsOfType(this IEnumerable<Claim> claims, params String[] requiredClaimTypes)
+                => HasAllClaimsOfType(claims, requiredClaimTypes ?? Enumerable.Empty<String>());
 
-            public static Claim GetClaimOfType(this IEnumerable<Claim> claims, String claimType, Boolean ignoreCase = false)
-                => GetClaimOfTypeOrDefault(claims, claimType, ignoreCase, default);
-            public static Boolean HasClaimOfType(this IEnumerable<Claim> claims, String claimType, out Claim claimOfType, Boolean ignoreCase = false)
-                => HasClaimOfTypeOrDefault(claims, claimType, out claimOfType, ignoreCase, default);
+            public static Nullable<Int64> GetClaimValueInt64(this IEnumerable<Claim> claims, String claimType)
+                => HasClaimsOfType(claims, claimType, out IEnumerable<Claim> claimsOfType)
+                    ? Int64.TryParse(claimsOfType.First().Value.Trim(), out Int64 value)
+                        ? value
+                        : default(Nullable<Int64>)
+                    : default(Nullable<Int64>);
 
+            public static Nullable<Int32> GetClaimValueInt32(this IEnumerable<Claim> claims, String claimType)
+                => HasClaimsOfType(claims, claimType, out IEnumerable<Claim> claimsOfType)
+                    ? Int32.TryParse(claimsOfType.First().Value.Trim(), out Int32 value)
+                        ? value
+                        : default(Nullable<Int32>)
+                    : default(Nullable<Int32>);
 
-            public static IEnumerable<Claim> GetAuthenticatedClaimsOfType(this IEnumerable<Claim> claims, String claimType, Boolean ignoreCase = false)
-                => claims.Where(claim => IsAuthenticated(claim) && String.Compare(claimType, claim.Type, ignoreCase).Equals(0));
-            public static Boolean HasAuthenticatedClaimsOfType(this IEnumerable<Claim> claims, String claimType, out IEnumerable<Claim> claimsOfType, Boolean ignoreCase = false)
-                => (claimsOfType = GetAuthenticatedClaimsOfType(claims, claimType, ignoreCase)).Any();
-            public static Boolean HasAuthenticatedClaimsOfType(this IEnumerable<Claim> claims, String claimType, Boolean ignoreCase = false)
-                => claims.Any(claim => IsAuthenticated(claim) && String.Compare(claimType, claim.Type, ignoreCase).Equals(0));
+            public static Nullable<Int16> GetClaimValueInt16(this IEnumerable<Claim> claims, String claimType)
+                => HasClaimsOfType(claims, claimType, out IEnumerable<Claim> claimsOfType)
+                    ? Int16.TryParse(claimsOfType.First().Value.Trim(), out Int16 value)
+                        ? value
+                        : default(Nullable<Int16>)
+                    : default(Nullable<Int16>);
 
+            public static Nullable<DateTime> GetClaimValueDateTime(this IEnumerable<Claim> claims, String claimType, IFormatProvider formatProvider, DateTimeStyles styles)
+                => HasClaimsOfType(claims, claimType, out IEnumerable<Claim> claimsOfType)
+                    ? DateTime.TryParse(claimsOfType.First().Value.Trim(), formatProvider, styles, out DateTime value)
+                        ? value
+                        : default(Nullable<DateTime>)
+                    : default(Nullable<DateTime>);
 
-            public static Claim GetAuthenticatedClaimOfTypeOrDefault(this IEnumerable<Claim> claims, String claimType, Boolean ignoreCase = false, Claim defaultValue = default)
-                => claims.FirstOrDefault(claim => IsAuthenticated(claim) && String.Compare(claimType, claim.Type, ignoreCase).Equals(0)) ?? defaultValue;
-            public static Boolean HasAuthenticatedClaimOfTypeOrDefault(this IEnumerable<Claim> claims, String claimType, out Claim claimOfType, Boolean ignoreCase = false, Claim defaultValue = default)
+            public static Nullable<DateTime> GetClaimValueDateTime(this IEnumerable<Claim> claims, String claimType)
+                => GetClaimValueDateTime(claims, claimType, DateTimeFormatInfo.CurrentInfo, DateTimeStyles.None);
+
+            public static Nullable<DateTimeOffset> GetClaimValueDateTimeOffset(this IEnumerable<Claim> claims, String claimType, IFormatProvider formatProvider, DateTimeStyles styles)
+                => HasClaimsOfType(claims, claimType, out IEnumerable<Claim> claimsOfType)
+                    ? DateTimeOffset.TryParse(claimsOfType.First().Value.Trim(), formatProvider, styles, out DateTimeOffset value)
+                        ? value
+                        : default(Nullable<DateTimeOffset>)
+                    : default(Nullable<DateTimeOffset>);
+
+            public static Nullable<DateTimeOffset> GetClaimValueDateTimeOffset(this IEnumerable<Claim> claims, String claimType)
+                => GetClaimValueDateTimeOffset(claims, claimType, DateTimeFormatInfo.CurrentInfo, DateTimeStyles.None);
+
+            public static Nullable<DateTimeOffset> GetClaimValueUnixTimeSeconds(this IEnumerable<Claim> claims, String claimType)
+                => HasClaimsOfType(claims, claimType, out IEnumerable<Claim> claimsOfType)
+                    ? Int64.TryParse(claimsOfType.First().Value.Trim(), out Int64 value)
+                        ? DateTimeOffset.FromUnixTimeSeconds(value)
+                        : default(Nullable<DateTimeOffset>)
+                    : default(Nullable<DateTimeOffset>);
+
+            public static Boolean HasClaims(this IEnumerable<Claim> claims, String claimType, IEnumerable<String> expectedValues)
             {
-                claimOfType = GetAuthenticatedClaimOfTypeOrDefault(claims, claimType, ignoreCase, null);
-                if (claimOfType != null)
-                    return true;
+                if (expectedValues == null)
+                    throw new ArgumentNullException(nameof(expectedValues));
 
-                claimOfType = defaultValue;
+                if (!expectedValues.Any())
+                    throw new ArgumentException($"The '{nameof(expectedValues)}' cannot be empty.", nameof(expectedValues));
+
+                if (NotHasClaimsOfType(claims, claimType, out IEnumerable<Claim> claimsOfType))
+                    return false;
+
+                var claimValues = claimsOfType.Select(c => c.Value.Trim());
+                foreach (var expectedValue in expectedValues)
+                    if (!claimValues.Contains(expectedValue))
+                        return false;
+                return true;
+            }
+            public static Boolean NotHasClaims(this IEnumerable<Claim> claims, String claimType, IEnumerable<String> expectedValues)
+                => !HasClaims(claims, claimType, expectedValues);
+
+            public static Boolean HasClaims(this IEnumerable<Claim> claims, String claimType, params String[] expectedValues)
+                => HasClaims(claims, claimType, expectedValues ?? Enumerable.Empty<String>());
+            public static Boolean NotHasClaims(this IEnumerable<Claim> claims, String claimType, params String[] expectedValues)
+                => NotHasClaims(claims, claimType, expectedValues ?? Enumerable.Empty<String>());
+
+            public static Boolean HasClaim(this IEnumerable<Claim> claims, String claimType, String expectedValue)
+                => HasClaims(claims, claimType, new[] { expectedValue });
+            public static Boolean NotHasClaim(this IEnumerable<Claim> claims, String claimType, String expectedValue)
+                => !HasClaim(claims, claimType, expectedValue);
+
+            public static Boolean AnyClaims(this IEnumerable<Claim> claims, String claimType, IEnumerable<String> expectedValues)
+            {
+                if (expectedValues == null)
+                    throw new ArgumentNullException(nameof(expectedValues));
+
+                if (!expectedValues.Any())
+                    throw new ArgumentException($"The '{nameof(expectedValues)}' cannot be empty.", nameof(expectedValues));
+
+                if (NotHasClaimsOfType(claims, claimType, out IEnumerable<Claim> claimsOfType))
+                    return false;
+
+                var claimValues = claimsOfType.Select(c => c.Value.Trim());
+                foreach (var expectedValue in expectedValues)
+                    if (claimValues.Contains(expectedValue))
+                        return true;
                 return false;
             }
+            public static Boolean NotAnyClaims(this IEnumerable<Claim> claims, String claimType, IEnumerable<String> expectedValues)
+                => !AnyClaims(claims, claimType, expectedValues);
 
-
-            public static Claim GetAuthenticatedClaimOfType(this IEnumerable<Claim> claims, String claimType, Boolean ignoreCase = false)
-                => GetAuthenticatedClaimOfTypeOrDefault(claims, claimType, ignoreCase, default);
-            public static Boolean HasAuthenticatedClaimOfType(this IEnumerable<Claim> claims, String claimType, out Claim claimOfType, Boolean ignoreCase = false)
-                => HasAuthenticatedClaimOfTypeOrDefault(claims, claimType, out claimOfType, ignoreCase, default);
-
-
-            public static IEnumerable<Claim> GetAuthenticatedClaimsOfType(this IEnumerable<Claim> claims, String claimType, String issuer, Boolean ignoreCaseForIssuer = false, Boolean ignoreCaseForClaimType = false)
-                => claims.Where(claim => IsAuthenticated(claim, issuer, ignoreCaseForIssuer) && String.Compare(claimType, claim.Type, ignoreCaseForClaimType).Equals(0));
-            public static Boolean HasAuthenticatedClaimsOfType(this IEnumerable<Claim> claims, String claimType, String issuer, out IEnumerable<Claim> claimsOfType, Boolean ignoreCaseForIssuer = false, Boolean ignoreCaseForClaimType = false)
-                => (claimsOfType = GetAuthenticatedClaimsOfType(claims, claimType, issuer, ignoreCaseForIssuer, ignoreCaseForClaimType)).Any();
-            public static Boolean HasAuthenticatedClaimsOfType(this IEnumerable<Claim> claims, String claimType, String issuer, Boolean ignoreCaseForIssuer = false, Boolean ignoreCaseForClaimType = false)
-                => claims.Any(claim => IsAuthenticated(claim, issuer, ignoreCaseForIssuer) && String.Compare(claimType, claim.Type, ignoreCaseForClaimType).Equals(0));
-
-
-            public static Claim GetAuthenticatedClaimOfTypeOrDefault(this IEnumerable<Claim> claims, String claimType, String issuer, Boolean ignoreCaseForIssuer = false, Boolean ignoreCaseForClaimType = false, Claim defaultValue = default)
-                => claims.FirstOrDefault(claim => IsAuthenticated(claim, issuer, ignoreCaseForIssuer) && String.Compare(claimType, claim.Type, ignoreCaseForClaimType).Equals(0)) ?? defaultValue;
-            public static Boolean HasAuthenticatedClaimOfTypeOrDefault(this IEnumerable<Claim> claims, String claimType, String issuer, out Claim claimOfType, Boolean ignoreCaseForIssuer = false, Boolean ignoreCaseForClaimType = false, Claim defaultValue = default)
-            {
-                claimOfType = GetAuthenticatedClaimOfTypeOrDefault(claims, claimType, issuer, ignoreCaseForIssuer, ignoreCaseForClaimType, null);
-                if (claimOfType != null)
-                    return true;
-
-                claimOfType = defaultValue;
-                return false;
-            }
-
-
-            public static Claim GetAuthenticatedClaimOfType(this IEnumerable<Claim> claims, String claimType, String issuer, Boolean ignoreCaseForIssuer = false, Boolean ignoreCaseForClaimType = false)
-                => GetAuthenticatedClaimOfTypeOrDefault(claims, claimType, issuer, ignoreCaseForIssuer, ignoreCaseForClaimType, default);
-            public static Boolean HasAuthenticatedClaimOfType(this IEnumerable<Claim> claims, String claimType, String issuer, out Claim claimOfType, Boolean ignoreCaseForIssuer = false, Boolean ignoreCaseForClaimType = false)
-                => HasAuthenticatedClaimOfTypeOrDefault(claims, claimType, issuer, out claimOfType, ignoreCaseForIssuer, ignoreCaseForClaimType, default);
-
+            public static Boolean AnyClaims(this IEnumerable<Claim> claims, String claimType, params String[] expectedValues)
+                => AnyClaims(claims, claimType, expectedValues ?? Enumerable.Empty<String>());
+            public static Boolean NotAnyClaims(this IEnumerable<Claim> claims, String claimType, params String[] expectedValues)
+                => NotAnyClaims(claims, claimType, expectedValues ?? Enumerable.Empty<String>());
         }
     }
 }

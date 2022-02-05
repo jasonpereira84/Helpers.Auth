@@ -1,10 +1,7 @@
-﻿using System;
-using System.Linq;
-using System.Security;
+﻿using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Collections.Generic;
-
 
 namespace JasonPereira84.Helpers
 {
@@ -12,24 +9,20 @@ namespace JasonPereira84.Helpers
     {
         public static partial class Auth
         {
-            public static ClaimsPrincipal AppendIdentities(this ClaimsPrincipal claimsPrincipal, IEnumerable<ClaimsIdentity> additionalIdentities)
+            public static ClaimsPrincipal AsClaimsPrincipal(this IIdentity identity)
+                => new ClaimsPrincipal(identity);
+
+            public static ClaimsPrincipal AsClaimsPrincipal(this IEnumerable<ClaimsIdentity> identities)
+                => new ClaimsPrincipal(identities);
+
+            public static ClaimsPrincipal AppendIdentities(this ClaimsPrincipal claimsPrincipal, IEnumerable<ClaimsIdentity> identities)
             {
-                claimsPrincipal.AddIdentities(identities: additionalIdentities);
+                claimsPrincipal.AddIdentities(identities);
                 return claimsPrincipal;
             }
 
-            public static ClaimsPrincipal AppendIdentities(this ClaimsPrincipal claimsPrincipal, params ClaimsIdentity[] additionalIdentities)
-                => AppendIdentities(claimsPrincipal, additionalIdentities ?? Enumerable.Empty<ClaimsIdentity>());
-
-            public static ClaimsPrincipal AsClaimsPrincipal(this IIdentity primaryIdentity)
-                => new ClaimsPrincipal(primaryIdentity);
-
-            public static ClaimsPrincipal AsClaimsPrincipal(this IIdentity primaryIdentity, IEnumerable<ClaimsIdentity> additionalIdentities)
-                => AppendIdentities(new ClaimsPrincipal(primaryIdentity), additionalIdentities);
-
-            public static ClaimsPrincipal AsClaimsPrincipal(this (IIdentity Primary, IEnumerable<ClaimsIdentity> Additional) identities)
-                => AsClaimsPrincipal(identities.Primary, identities.Additional);
-
+            public static ClaimsPrincipal AppendIdentities(this ClaimsPrincipal claimsPrincipal, params ClaimsIdentity[] identities)
+                => AppendIdentities(claimsPrincipal, identities ?? Enumerable.Empty<ClaimsIdentity>());
         }
     }
 }
