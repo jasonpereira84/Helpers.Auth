@@ -5,8 +5,8 @@
     <Product>Helpers.Auth</Product>
     <Copyright>Copyright © 2019</Copyright>
     <NeutralLanguage>en</NeutralLanguage>
-    <AssemblyVersion>2.0.1.0</AssemblyVersion>
-    <InformationalVersion>2.0.1.0</InformationalVersion>
+    <AssemblyVersion>6.0.0.0</AssemblyVersion>
+    <InformationalVersion>6.0.0.0</InformationalVersion>
   </PropertyGroup>
 
 </Project>
