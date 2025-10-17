@@ -60,14 +60,14 @@ namespace JasonPereira84.Helpers.Auth.Tests
                 {
                     var claims = new Claim[0];
 
-                    Assert.ThrowsException<ArgumentNullException>(
+                    Assert.Throws<ArgumentNullException>(
                         () => claims.HasAllClaimsOfType(default(IEnumerable<String>)));
                 }
 
                 {
                     var claims = new Claim[0];
 
-                    Assert.ThrowsException<ArgumentException>(
+                    Assert.Throws<ArgumentException>(
                         () => claims.HasAllClaimsOfType(new String[0]));
                 }
 
@@ -328,7 +328,7 @@ namespace JasonPereira84.Helpers.Auth.Tests
                         new Claim("t1","v1_2"),
                     };
 
-                    Assert.ThrowsException<ArgumentNullException>(
+                    Assert.Throws<ArgumentNullException>(
                         () => claims.HasClaims("t1", default(IEnumerable<String>)));
                 }
 
@@ -338,7 +338,7 @@ namespace JasonPereira84.Helpers.Auth.Tests
                         new Claim("t1","v1_2"),
                     };
 
-                    Assert.ThrowsException<ArgumentException>(
+                    Assert.Throws<ArgumentException>(
                         () => claims.HasClaims("t1", new String[0]));
                 }
 
@@ -378,7 +378,7 @@ namespace JasonPereira84.Helpers.Auth.Tests
                         new Claim("t1","v1_2"),
                     };
 
-                    Assert.ThrowsException<ArgumentNullException>(
+                    Assert.Throws<ArgumentNullException>(
                         () => claims.AnyClaims("t1", default(IEnumerable<String>)));
                 }
 
@@ -388,7 +388,7 @@ namespace JasonPereira84.Helpers.Auth.Tests
                         new Claim("t1","v1_2"),
                     };
 
-                    Assert.ThrowsException<ArgumentException>(
+                    Assert.Throws<ArgumentException>(
                         () => claims.AnyClaims("t1", new String[0]));
                 }
 

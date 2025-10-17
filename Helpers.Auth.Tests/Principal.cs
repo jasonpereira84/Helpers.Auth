@@ -24,15 +24,15 @@ namespace JasonPereira84.Helpers.Auth.Tests
 
                 var principal = new Principal(claims);
                 Assert.IsNotNull(principal._claimMap);
-                Assert.IsTrue(principal._claimMap.Keys.Count() == 3);
-                Assert.IsTrue(principal._claimMap.Values.Count() == 3);
-                Assert.IsTrue(principal._claimMap["t3"].Count() == 2);
+                Assert.AreEqual(expected: 3, actual: principal._claimMap.Keys.Count());
+                Assert.AreEqual(expected: 3, actual: principal._claimMap.Values.Count());
+                Assert.AreEqual(expected: 2, actual: principal._claimMap["t3"].Count());
             }
 
             {
                 var claims = default(IEnumerable<Claim>);
 
-                Assert.ThrowsException<ArgumentNullException>(
+                Assert.Throws<ArgumentNullException>(
                     () => new Principal(claims));
             }
 
@@ -84,7 +84,7 @@ namespace JasonPereira84.Helpers.Auth.Tests
                     };
 
                     var principal = new Principal(claims);
-                    Assert.IsTrue(principal._claimMap["t1"].First() == "v1");
+                    Assert.AreEqual(expected: "v1", actual: principal._claimMap["t1"].First());
                 }
 
             }
@@ -96,7 +96,7 @@ namespace JasonPereira84.Helpers.Auth.Tests
                 };
 
                 var principal = new Principal(claims);
-                Assert.IsTrue(principal._claimMap["t1"].Count() == 1);
+                Assert.AreEqual(expected: 1, actual: principal._claimMap["t1"].Count());
             }
 
         }
@@ -360,7 +360,7 @@ namespace JasonPereira84.Helpers.Auth.Tests
                     new Claim("t1","v1_2"),
                 });
 
-                Assert.ThrowsException<ArgumentNullException>(
+                Assert.Throws<ArgumentNullException>(
                     () => principal.HasClaims("t1", default(IEnumerable<String>)));
             }
 
@@ -370,7 +370,7 @@ namespace JasonPereira84.Helpers.Auth.Tests
                     new Claim("t1","v1_2"),
                 });
 
-                Assert.ThrowsException<ArgumentException>(
+                Assert.Throws<ArgumentException>(
                     () => principal.HasClaims("t1", new String[0]));
             }
 
@@ -410,7 +410,7 @@ namespace JasonPereira84.Helpers.Auth.Tests
                     new Claim("t1","v1_2"),
                 });
 
-                Assert.ThrowsException<ArgumentNullException>(
+                Assert.Throws<ArgumentNullException>(
                     () => principal.AnyClaims("t1", default(IEnumerable<String>)));
             }
 
@@ -420,7 +420,7 @@ namespace JasonPereira84.Helpers.Auth.Tests
                     new Claim("t1","v1_2"),
                 });
 
-                Assert.ThrowsException<ArgumentException>(
+                Assert.Throws<ArgumentException>(
                     () => principal.AnyClaims("t1", new String[0]));
             }
 

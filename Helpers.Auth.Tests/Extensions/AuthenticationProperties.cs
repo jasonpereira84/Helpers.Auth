@@ -28,7 +28,7 @@ namespace JasonPereira84.Helpers.Auth.Tests
                 {
                     var authenticationProperties = new AuthenticationProperties();
 
-                    Assert.ThrowsException<ArgumentNullException>(
+                    Assert.Throws<ArgumentNullException>(
                         () => authenticationProperties.ExpireIn(default(TimeSpan)));
                 }
 
