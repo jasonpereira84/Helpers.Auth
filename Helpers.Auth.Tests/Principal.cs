@@ -32,7 +32,7 @@ namespace JasonPereira84.Helpers.Auth.Tests
             {
                 var claims = default(IEnumerable<Claim>);
 
-                Assert.ThrowsException<ArgumentNullException>(
+                Assert.Throws<ArgumentNullException>(
                     () => new Principal(claims));
             }
 
@@ -360,7 +360,7 @@ namespace JasonPereira84.Helpers.Auth.Tests
                     new Claim("t1","v1_2"),
                 });
 
-                Assert.ThrowsException<ArgumentNullException>(
+                Assert.Throws<ArgumentNullException>(
                     () => principal.HasClaims("t1", default(IEnumerable<String>)));
             }
 
@@ -370,7 +370,7 @@ namespace JasonPereira84.Helpers.Auth.Tests
                     new Claim("t1","v1_2"),
                 });
 
-                Assert.ThrowsException<ArgumentException>(
+                Assert.Throws<ArgumentException>(
                     () => principal.HasClaims("t1", new String[0]));
             }
 
@@ -410,7 +410,7 @@ namespace JasonPereira84.Helpers.Auth.Tests
                     new Claim("t1","v1_2"),
                 });
 
-                Assert.ThrowsException<ArgumentNullException>(
+                Assert.Throws<ArgumentNullException>(
                     () => principal.AnyClaims("t1", default(IEnumerable<String>)));
             }
 
@@ -420,7 +420,7 @@ namespace JasonPereira84.Helpers.Auth.Tests
                     new Claim("t1","v1_2"),
                 });
 
-                Assert.ThrowsException<ArgumentException>(
+                Assert.Throws<ArgumentException>(
                     () => principal.AnyClaims("t1", new String[0]));
             }
 
